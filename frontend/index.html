@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Autocomplete System - Login</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div id="login-screen" class="center-screen">
+        <div class="login-box">
+            <h2>Bem-vindo</h2>
+            <p>Simulação de Acesso ao Sistema</p>
+            <input type="text" id="login-username" placeholder="Seu nome de usuário..." class="shared-input-style" style="margin-bottom: 10px;">
+            <button id="btn-login" style="width: 100%;">Entrar no Sistema</button>
+        </div>
+    </div>
+
+    <div id="app-screen" style="display: none;">
+        <h2>Algoritmo de Autocomplete (Trie)</h2>
+        <p>Logado como: <strong id="user-display">...</strong></p>
+        
+        <div class="input-group">
+            <div class="input-wrapper">
+                <input type="text" id="ghost-input" class="shared-input-style" readonly />
+                <input type="text" id="autocomplete-input" class="shared-input-style" placeholder="Digite algo (ex: Oi)..." autocomplete="off" />
+            </div>
+            <input type="submit" id="submit-button" value="Enviar / Aprender" style="padding: 8px;" />
+        </div>
+
+        <ul id="suggestions-list"></ul>
+
+        <div class="actions">
+            <h3>Gestão de Dados</h3>
+            <button id="btn-sync">☁️ Sincronizar</button>
+            <button id="btn-clear" class="btn-clear">🗑️ Limpar Memória</button>
+        </div>
+    </div>
+
+    <script src="./node_modules/dexie/dist/dexie.js"></script>
+    <script src="./js/main.js" type="module"></script>
+</body>
+</html>
