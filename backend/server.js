@@ -8,22 +8,6 @@ const PORT = 3000;
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 
-// ROTA DE LOGIN SIMULADO
-app.post('/login', (req, res) => {
-    const { username } = req.body;
-    
-    // Simulação: Se enviou nome, loga. Se não, gera um genérico.
-    const userId = username || `user_${Date.now()}`;
-    
-    console.log(`🔑 [LOGIN] Usuário logado: ${userId}`);
-
-    // Retorna o ID para o front usar
-    res.json({ 
-        userId: userId, 
-        message: "Login realizado com sucesso" 
-    });
-});
-
 app.post('/sync', (req, res) => {
     const { userId, changes, lastSyncedAt } = req.body;
     const clientLastSync = lastSyncedAt || 0;
@@ -60,6 +44,7 @@ app.post('/sync', (req, res) => {
     console.log(`📤 [RES] Enviando Delta: ${deltaResponse.length} itens.`);
     res.json(deltaResponse);
 });
+
 
 // --- NOVA ROTA: DOWNLOAD TOTAL ---
 app.get('/sync/full-download', (req, res) => {
