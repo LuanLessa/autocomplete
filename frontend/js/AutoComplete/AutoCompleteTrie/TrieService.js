@@ -113,29 +113,4 @@ export default class TrieService {
             this._restoreSentenceInTrie(item.t, item.f);
         }
     }
-
-    /**
-     * Exporta todos os dados da Trie para uma string JSON.
-     * O formato de exportação é otimizado para ser compacto (uma lista de arrays [texto, frequência]).
-     *
-     * @param {boolean} [prettyPrint=false] Se verdadeiro, formata o JSON com recuo (indentação) para facilitar a leitura humana.
-     * @returns {string} Uma string JSON contendo todos os dados da Trie.
-     */
-    exportToJson(prettyPrint = false) {
-        const results = [];
-        // Coleta todas as sentenças a partir da raiz
-        this._collectSentencesRecursively(this.root, results); 
-        
-        // Mapeia para o formato minificado: [texto, frequência]
-        const minifiedData = results.map(item => [
-            item.text,
-            item.frequency
-        ]);
-
-        if (prettyPrint) {
-            return JSON.stringify(minifiedData, null, 2);
-        } else {
-            return JSON.stringify(minifiedData);
-        }
-    }
 }

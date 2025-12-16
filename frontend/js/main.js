@@ -35,76 +35,6 @@ const handleSave = (text) => {
     }
 };
 
-const handleSync = async () => {
-    ui.setSyncStatus('syncing');
-    
-    // 💡 FLUXO DE SINCRONIZAÇÃO BASEADO NO ESTADO LIMPO
-    if (acSystem.isCleanSlate) {
-        // FLUXO 1: ESTADO LIMPO (Download Total)
-        console.warn("Detectado Estado Limpo. Iniciando Full Download.");
-        
-        try {
-            // 1. Puxa TODOS os dados do servidor.
-            const fullServerData = await api.fullDownload(userId);
-            
-            if (fullServerData.length > 0) {
-                // 2. Insere TUDO localmente e marca como sincronizado (1).
-                await acSystem.smartMerge(JSON.stringify(fullServerData));
-                console.log(`Sucesso: ${fullServerData.length} itens restaurados.`);
-            } else {
-                console.log("Servidor também estava vazio, nada para restaurar.");
-            }
-            
-            // 3. O sistema não está mais limpo
-            acSystem.isCleanSlate = false;
-            localStorage.setItem(`last_sync_${userId}`, Date.now()); // Zera o last_sync
-
-            alert(`Restauração Completa OK!`);
-        } catch (error) {
-            console.error("Erro no Full Download:", error);
-            alert("Erro na Restauração: " + error.message);
-        } finally {
-            ui.setSyncStatus('idle');
-        }
-        //return; // Finaliza o sync, pois o Full Download resolveu tudo.
-    }
-    
-    // FLUXO 2: SINCRONIZAÇÃO DELTA NORMAL (Se não estiver limpo)
-    try {
-        // 1. PREPARAÇÃO: Pega o delta para upload
-        const jsonChanges = await acSystem.getUnsyncedData();
-        const payload = jsonChanges ? JSON.parse(jsonChanges) : [];
-        const lastSync = Number(localStorage.getItem(`last_sync_${userId}`)) || 0;
-
-        // 2. SINCRONIZAÇÃO: Envio do Upload + Recebimento do Download
-        const serverDelta = await api.sync(userId, payload, lastSync);
-
-        // 3. INTEGRAÇÃO: Processa o que veio do servidor (D2)
-        if (serverDelta.length > 0) {
-            await acSystem.smartMerge(JSON.stringify(serverDelta));
-            console.log(`[Sync] Recebidos ${serverDelta.length} itens do servidor.`);
-        }
-
-        // 4. LIMPEZA: Marca o que foi enviado (D1) como sincronizado
-        if (jsonChanges) {
-            // O servidor confirmou o recebimento, agora limpamos localmente.
-            await acSystem.markAsSynced(jsonChanges); 
-            console.log(`[Sync] ${payload.length} itens locais marcados como sincronizados.`);
-        }
-
-        // 5. MARCO DE TEMPO: Só atualiza o timestamp após o SUCESSO de tudo.
-        localStorage.setItem(`last_sync_${userId}`, Date.now());
-        
-        alert(`Sincronização OK!`);
-
-    } catch (error) {
-        // Se der erro, nada é marcado como synced e será tentado de novo no próximo ciclo.
-        alert("Erro na Sincronização Delta: " + error.message);
-    } finally {
-        ui.setSyncStatus('idle');
-    }
-};
-
 const handleClear = async () => {
     if(confirm("Apagar memória local?")) {
         await acSystem.clearUserData();
@@ -116,7 +46,6 @@ const handleClear = async () => {
 ui.bindEvents({
     onInput: handleInput,
     onSave: handleSave,
-    onSync: handleSync,
     onClear: handleClear
 });
 

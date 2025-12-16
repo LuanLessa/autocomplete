@@ -3,7 +3,6 @@ export default class UIManager {
         this.inputReal = document.getElementById('autocomplete-input');
         this.inputGhost = document.getElementById('ghost-input');
         this.list = document.getElementById('suggestions-list');
-        this.btnSync = document.getElementById('btn-sync');
         this.btnSubmit = document.getElementById('submit-button');
         this.btnClear = document.getElementById('btn-clear');
 
@@ -12,7 +11,7 @@ export default class UIManager {
         this.indiceAtual = 0; 
     }
 
-    bindEvents({ onInput, onSave, onSync, onClear }) {
+    bindEvents({ onInput, onSave, onClear }) {
         // 1. Digitação
         this.inputReal.addEventListener('input', (e) => {
             // Reset ao digitar algo novo (Lógica original)
@@ -76,7 +75,6 @@ export default class UIManager {
             onSave(this.inputReal.value);
         });
 
-        this.btnSync.addEventListener('click', () => onSync());
         this.btnClear.addEventListener('click', () => onClear());
     }
 
@@ -158,13 +156,4 @@ export default class UIManager {
         this.sugestoesAtuais = [];
     }
 
-    setSyncStatus(status) {
-        if (status === 'syncing') {
-            this.btnSync.innerText = "⏳ ...";
-            this.btnSync.disabled = true;
-        } else {
-            this.btnSync.innerText = "☁️ Sincronizar";
-            this.btnSync.disabled = false;
-        }
-    }
 }
