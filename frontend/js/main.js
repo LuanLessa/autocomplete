@@ -1,14 +1,9 @@
 import AutoCompleteSystem from './AutoComplete/AutoCompleteSystem.js';
 import UIManager from './ui/UIManager.js';
 
-const API_URL = "http://localhost:3000";
-
-// Instâncias Globais (Mas o Sistema de Autocomplete começa null)
 const userId = "TESTE";
-const acSystem = new AutoCompleteSystem(userId); 
-
-acSystem.initialize()
-
+const acSystem = new AutoCompleteSystem(userId);
+acSystem.startPeriodicSync(5000); // Teste com 5 segundos
 
 const ui = new UIManager();
 
@@ -19,7 +14,7 @@ const handleInput = (text) => {
         ui.clearSuggestions();
         return;
     }
-    // Usa a instância criada no login
+
     const suggestions = acSystem.getSuggestions(text);
     
     ui.updateGhostInput(text, suggestions[0]?.text);
@@ -50,7 +45,6 @@ ui.bindEvents({
 });
 
 
-// Mantivemos igual, apenas ajustando para usar a instância 'ac'
 async function gerarMassaDeDados(quantidade = 5000) {
     console.time("Tempo de Geração"); 
     
@@ -79,5 +73,4 @@ async function gerarMassaDeDados(quantidade = 5000) {
     alert(`Gerados ${contador} registros! Note que a gravação no disco pode levar alguns segundos em background.`);
 }
 
-// Expõe a função para o console global para você testar
 window.gerarMassaDeDados = gerarMassaDeDados;

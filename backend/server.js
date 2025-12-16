@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const db = require('./database'); // Importa o "banco"
+const db = require('./database');
 
 const app = express();
 const PORT = 3000;
@@ -14,12 +14,9 @@ app.post('/sync', (req, res) => {
 
     console.log(`\n📦 [REQ] User: ${userId} | Deltas: ${changes.length}`);
 
-    // CORREÇÃO: Ignora uploads vazios. NUNCA apaga.
     if (changes.length === 0) {
         console.log("[SYNC] Nenhum delta enviado. Passando para o download.");
-        // Não precisamos fazer nada com o banco de dados principal.
     } else {
-        // 1. Processa Uploads (Usa a função do database.js)
         let updatedCount = 0;
         changes.forEach(item => {
             const [texto, freq, clientTime] = item;
@@ -30,7 +27,6 @@ app.post('/sync', (req, res) => {
         console.log(`[SYNC] ${updatedCount} itens atualizados/inseridos.`);
     }
 
-    // 2. Prepara Downloads (Filtra dados)
     const userDB = db.getUserData(userId);
     const deltaResponse = [];
 
@@ -46,10 +42,7 @@ app.post('/sync', (req, res) => {
 });
 
 
-// --- NOVA ROTA: DOWNLOAD TOTAL ---
 app.get('/sync/full-download', (req, res) => {
-    // ⚠ NOTA: Em produção, você precisa de autenticação para obter o userId daqui.
-    // Aqui, vamos assumir que o userId é passado via query ou cabeçalho.
     const userId = req.query.userId; 
 
     if (!userId) {
@@ -59,8 +52,6 @@ app.get('/sync/full-download', (req, res) => {
     const userDB = db.getUserData(userId);
     const fullData = [];
 
-    // Mapeia todas as frases armazenadas para o formato esperado pelo cliente:
-    // [texto, frequencia, timestamp]
     for (const texto in userDB) {
         const item = userDB[texto];
         fullData.push([texto, item.f, item.up]);
