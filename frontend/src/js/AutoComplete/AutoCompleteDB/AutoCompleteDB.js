@@ -1,3 +1,5 @@
+import Dexie from 'dexie';
+
 /**
  * Gerencia o banco de dados local (IndexedDB) para o recurso de AutoComplete.
  * Estende a classe Dexie para fornecer acesso tipado e versionado aos dados.

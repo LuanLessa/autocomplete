@@ -1,0 +1,11 @@
+body {
+    margin: 0;
+}
+
+.App{
+    font-family: sans-serif; 
+    flex-direction: column; /* Empilha os itens verticalmente */
+    min-height: 100vh; /* Garante que o body ocupe pelo menos a altura da viewport */
+    margin: 0;
+    padding: 0;
+}
