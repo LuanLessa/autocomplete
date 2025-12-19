@@ -2,10 +2,6 @@ import AutoCompleteDB from './AutoCompleteDB/AutoCompleteDB.js';
 import AutoCompleteRepository from './AutoCompleteDB/AutoCompleteRepository.js';
 import TrieService from './AutoCompleteTrie/TrieService.js';
 import AutoCompleteSyncService from './AutoCompleteSync/AutoCompleteSyncService.js';
-import { createClient } from '@supabase/supabase-js'
-
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_KEY;
 
 /**
  * Controlador Principal (Facade) do sistema de AutoComplete.
@@ -16,10 +12,10 @@ export default class AutoCompleteSystem {
     /**
      * Inicializa o sistema para um usuário específico.
      * Instancia as dependências de Repositório, Trie e Serviço de Sync.
-     * * @param {string|number} userId - Identificador único do usuário. Obrigatório.
+     * @param {string|number} userId - Identificador único do usuário. Obrigatório.
      * @throws {Error} Se userId não for fornecido.
      */
-    constructor(userId) {
+    constructor(userId, supabaseClient) {
         if (!userId) throw new Error("AutoCompleteSystem: userId é obrigatório.");
         this.userId = userId;
         
@@ -30,16 +26,13 @@ export default class AutoCompleteSystem {
         // Camada de Estrutura de Dados (Memória RAM)
         this.trieService = new TrieService();
 
-        // Configuração do Supabase
-        const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-        
-        // Camada de Rede (Network)
-        this.syncService = new AutoCompleteSyncService(supabase);
-        
         // Estado interno
         this.isCleanSlate = false; // Indica se o DB estava vazio
         this.syncIntervalId = null; // ID do timer de sync automático
         this.isSyncing = false; // Flag para evitar condições de corrida (race conditions)
+        
+        // Camada de Rede (Network)
+        this.syncService = new AutoCompleteSyncService(supabaseClient);
     }
 
     /**
@@ -63,7 +56,7 @@ export default class AutoCompleteSystem {
             // Cenario A: Primeira instalação ou cache limpo (Cold Start)
             if (userSentences.length === 0) {
                 this.isCleanSlate = true;
-                console.warn("[INIT] Local DB vazio. Forçando Full Download...");
+                console.info("[INIT] Local DB vazio. Forçando Full Download...");
                 
                 try {
                     // Busca dados brutos do servidor
@@ -121,6 +114,7 @@ export default class AutoCompleteSystem {
             }
         } finally {
             this.isSyncing = false;
+            this.isCleanSlate = false;
         }
     }
 
@@ -192,7 +186,7 @@ export default class AutoCompleteSystem {
      * Inicia o ciclo de sincronização em segundo plano (Polling).
      * @param {number} intervalMs - Intervalo em milissegundos (Padrão: 30s).
      */
-    startPeriodicSync(intervalMs = 30000) { 
+    async startPeriodicSync(intervalMs = 30000) { 
         if (this.syncIntervalId) {
             console.warn("[System] Sync automático já está rodando.");
             return; 
@@ -201,7 +195,7 @@ export default class AutoCompleteSystem {
         console.log(`[System] Sync automático iniciado a cada ${intervalMs/1000}s`);
         
         // Executa imediatamente a primeira vez
-        this.initialize();
+        await this.initialize();
 
         // Agenda repetições
         this.syncIntervalId = setInterval(() => {

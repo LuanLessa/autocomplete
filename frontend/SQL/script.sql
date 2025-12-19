@@ -53,3 +53,22 @@ with check ( true );
 create policy "Permitir Atualização Publica"
 on user_items for update
 using ( true );
+
+---------------------------------
+
+-- 1. Remove as policies antigas (públicas)
+drop policy if exists "Permitir Leitura Publica" on user_items;
+drop policy if exists "Permitir Inserção Publica" on user_items;
+drop policy if exists "Permitir Atualização Publica" on user_items;
+
+-- 2. Cria a Policy de "Dono dos Dados"
+-- Tradução: "Permita tudo (ALL) na tabela user_items
+-- DESDE QUE o user_id da linha seja igual ao ID do usuário logado (auth.uid())"
+create policy "Acesso Apenas Dono"
+on user_items
+for all
+using ( auth.uid()::text = user_id )
+with check ( auth.uid()::text = user_id );
+
+-- 3. Garante que o RLS está ativo
+alter table user_items enable row level security;
