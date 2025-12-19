@@ -2,6 +2,10 @@ import AutoCompleteDB from './AutoCompleteDB/AutoCompleteDB.js';
 import AutoCompleteRepository from './AutoCompleteDB/AutoCompleteRepository.js';
 import TrieService from './AutoCompleteTrie/TrieService.js';
 import AutoCompleteSyncService from './AutoCompleteSync/AutoCompleteSyncService.js';
+import { createClient } from '@supabase/supabase-js'
+
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_KEY;
 
 /**
  * Controlador Principal (Facade) do sistema de AutoComplete.
@@ -25,9 +29,12 @@ export default class AutoCompleteSystem {
         
         // Camada de Estrutura de Dados (Memória RAM)
         this.trieService = new TrieService();
+
+        // Configuração do Supabase
+        const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
         
         // Camada de Rede (Network)
-        this.syncService = new AutoCompleteSyncService('http://localhost:3000');
+        this.syncService = new AutoCompleteSyncService(supabase);
         
         // Estado interno
         this.isCleanSlate = false; // Indica se o DB estava vazio
